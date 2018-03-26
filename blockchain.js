@@ -42,8 +42,12 @@ class BlockChain {
     });
   }
 
-  blockIsValid(block){
-    const blockDataString = block.previousBlock + JSON.stringify(block.data) + block.challenge + block.createDatetime + block.proofOfWork;
+  blockIsValid(block) {
+    const blockDataString = block.previousBlock
+      + JSON.stringify(block.data)
+      + block.challenge
+      + block.createDatetime
+      + block.proofOfWork;
     return sha256(blockDataString).then(hash => block.hash === hash);
   }
 
@@ -54,15 +58,20 @@ class BlockChain {
   verifyChain() {
     let prevHash = '0';
     let chainIsValid = true;
+
+    const chainPromises = this.chain.map(block => ({ ...block, isValid: this.blockIsValid(block) }));
+
     return new Promise((resolve, reject) => {
-      this.chain.forEach(block => {
-        this.blockIsValid(block).then(isValid => {
-          if (!isValid || block.previousBlock !== prevHash) {
-            reject('chain is not valid')
+      Promise.all(chainPromises).then(chainChecks => {
+        chainChecks.forEach(block => {
+          console.log(block)
+          if (!block.isValid || block.previousBlock !== prevHash) {
+            chainIsValid = false;
           }
+          prevHash = block.hash;
         })
+        chainIsValid ? resolve('chain is valid') : reject('chain is not valid');
       });
-      resolve(chainIsValid);
-    });
+    })
   }
 }

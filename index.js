@@ -17,7 +17,7 @@ function initializeBlockchain() {
   blockchain.createGenesisBlock()
     .then(() => {
       const generationTime = performance.now() - startTime;
-      console.log(blockchain, `Generated in ${generationTime} milliseconds` );
+      console.log(blockchain, `Generated in ${generationTime} milliseconds`);
       displayBlockchain();
     })
     .then(() => {
@@ -27,7 +27,10 @@ function initializeBlockchain() {
 function addBlock(ev) {
   const newBlockData = document.getElementById('new-block-data');
   const lastHash = blockchain.getLastBlockHash();
+  const startTime = performance.now();
   blockchain.createBlock(newBlockData.value, lastHash).then(() => {
+    const generationTime = performance.now() - startTime;
+    console.log(blockchain, `Generated in ${generationTime} milliseconds`);
     newBlockData.value = '';
     displayBlockchain();
   });
@@ -39,6 +42,8 @@ function displayBlockchain() {
 }
 
 function verifyChain() {
-  blockchain.verifyChain().then(isValid => console.log('Chain is calid'));
+  blockchain.verifyChain()
+    .then(isValid => alert('chain validation: ' + isValid),
+      error => alert('chain validation: ' + error));
 }
 
